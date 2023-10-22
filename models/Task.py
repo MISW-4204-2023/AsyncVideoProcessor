@@ -15,6 +15,7 @@ class Task(Base):
     input_format = Column(Enum(Formats), nullable=False)
     output_format = Column(Enum(Formats))
     processed = Column(DateTime)
+    inprocess = Column(DateTime)
     status = Column(Enum(Status), nullable=False, default=Status.UPLOADED)
     user_id = Column(Integer)
 

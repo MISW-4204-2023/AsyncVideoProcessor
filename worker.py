@@ -12,6 +12,9 @@ celery = Celery("tasks", broker=broker)
 def process_video(task_id):
     task = session.query(Task).filter_by(id=task_id, status=Status.UPLOADED).first()
     if task is not None:
+        task.inprocess = datetime.utcnow()
+        task.status = Status.INPROCESS
+        session.commit()
         os.makedirs(os.path.join("videos", str(task.user_id), "output"), exist_ok=True)
         convert_video(
             "videos/{}/input/{}.{}".format(task.user_id, task.id, task.input_format.value),
