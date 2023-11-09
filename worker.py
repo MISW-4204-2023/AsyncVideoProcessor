@@ -21,10 +21,10 @@ def process_video(task_id):
         file_name_input = "{}.{}".format(task.id, task.input_format.value)
         file_name_output = "{}.{}".format(task.id, task.output_format.value)
         input_file_name = os.path.join(
-            "videos", str(task.user_id), "input", file_name_input
+            "temp", str(task.user_id), "input", file_name_input
         )
         output_file_name = os.path.join(
-            "videos", str(task.user_id), "output", file_name_output
+            "temp", str(task.user_id), "output", file_name_output
         )
 
         input_blob_name = BLOB_FORMAT.format(
@@ -38,12 +38,12 @@ def process_video(task_id):
             task.output_format.value,
         )
 
-        os.makedirs(os.path.join("videos", str(task.user_id), "input"), exist_ok=True)
+        os.makedirs(os.path.join("temp", str(task.user_id), "input"), exist_ok=True)
         download_file_from_bucket(input_blob_name, input_file_name)
 
         convert_video(input_file_name, output_file_name)
 
-        os.makedirs(os.path.join("videos", str(task.user_id), "output"), exist_ok=True)
+        os.makedirs(os.path.join("temp", str(task.user_id), "output"), exist_ok=True)
         upload_to_bucket(output_blob_name, output_file_name)
 
         os.remove(input_file_name)
