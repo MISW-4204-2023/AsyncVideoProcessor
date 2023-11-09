@@ -46,8 +46,10 @@ def process_video(task_id):
         os.makedirs(os.path.join("temp", str(task.user_id), "output"), exist_ok=True)
         upload_to_bucket(output_blob_name, output_file_name)
 
-        os.remove(input_file_name)
-        os.remove(output_file_name)
+        if os.path.exists(input_file_name):
+            os.remove(input_file_name)
+        if os.path.exists(output_file_name):
+            os.remove(output_file_name)
         task.processed = datetime.utcnow()
         task.status = Status.PROCESSED
         session.commit()
