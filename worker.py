@@ -3,7 +3,8 @@ import os
 from convert_video import convert_video
 from gcp.cloud_storage import BLOB_FORMAT, download_file_from_bucket, upload_to_bucket
 from google.cloud import pubsub_v1
-from models import Status, Task, session
+from models import Status, Task, engine
+from sqlalchemy.orm import sessionmaker
 
 
 upload_folder = os.environ.get("UPLOAD_FOLDER", "videos")
@@ -26,7 +27,8 @@ def process_video(message: pubsub_v1.subscriber.message.Message):
     try:
         print("Procesando el archivo {}".format(message.data))
         task_id = int(message.data)
-
+        Session = sessionmaker(bind=engine)
+        session = Session()
         task = session.query(Task).filter_by(id=task_id, status=Status.UPLOADED).first()
         if task is not None:
             task.inprocess = datetime.utcnow()
