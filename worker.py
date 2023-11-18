@@ -15,7 +15,7 @@ def subscriber_gcp():
         subscription_path = (
             "projects/cloud-uniandes-403120/subscriptions/testSuscription"
         )
-        flow_control = pubsub_v1.types.FlowControl(max_messages=4)
+        flow_control = pubsub_v1.types.FlowControl(max_messages=1)
 
         streaming_pull_future = subscriber.subscribe(
             subscription_path, callback=process_video, flow_control=flow_control
