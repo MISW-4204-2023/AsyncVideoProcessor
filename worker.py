@@ -7,14 +7,8 @@ from concurrent.futures import TimeoutError
 from google.cloud import pubsub_v1
 from models import Status, Task, session
 
-""" broker = os.environ.get("REDIS_CONN", "redis://localhost:6379/0")
-celery = Celery("tasks", broker=broker) """
 
 upload_folder = os.environ.get("UPLOAD_FOLDER", "videos")
-
-
-credentials_path = './cloud-uniandes-private-key.json'
-os.environ['GOOGLE_APLICATION_CREDENTIALS'] = credentials_path
 
 def subscriber_gcp():
     timeout = 30
