@@ -75,7 +75,8 @@ def process_video(message: pubsub_v1.subscriber.message.Message):
             task.status = Status.PROCESSED
             session.commit()
             message.ack()
-    except:
+    except Exception as ex:
+        print(ex.message)
         print("Error procesando el archivo {}".format(message.data))
         message.nack()
 
