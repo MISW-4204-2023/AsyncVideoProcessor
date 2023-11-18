@@ -3,15 +3,34 @@ import os
 from celery import Celery
 from convert_video import convert_video
 from gcp.cloud_storage import BLOB_FORMAT, download_file_from_bucket, upload_to_bucket
+from concurrent.futures import TimeoutError
+from google.cloud import pubsub_v1
 from models import Status, Task, session
 
-broker = os.environ.get("REDIS_CONN", "redis://localhost:6379/0")
-celery = Celery("tasks", broker=broker)
+""" broker = os.environ.get("REDIS_CONN", "redis://localhost:6379/0")
+celery = Celery("tasks", broker=broker) """
+
 upload_folder = os.environ.get("UPLOAD_FOLDER", "videos")
 
 
-@celery.task(name="process_video")
-def process_video(task_id):
+credentials_path = './cloud-uniandes-private-key.json'
+os.environ['GOOGLE_APLICATION_CREDENTIALS'] = credentials_path
+
+def subscriber_gcp():
+    timeout = 30
+    subscriber = pubsub_v1.SubscriberClient()
+    subscription_path = 'projects/cloud-uniandes-403120/subscriptions/testSuscription'
+    streaming_pull_future  = subscriber.subscriber(subscription_path, calback = process_video )
+
+    with subscriber:
+        try:
+            streaming_pull_future.result(timeout=timeout)
+        except TimeoutError:
+            streaming_pull_future.cancel() 
+            streaming_pull_future.result()  
+
+def process_video(message: pubsub_v1.subscriber.message.Message):
+    task_id = int(message.data) 
     task = session.query(Task).filter_by(id=task_id, status=Status.UPLOADED).first()
     if task is not None:
         task.inprocess = datetime.utcnow()
@@ -53,3 +72,5 @@ def process_video(task_id):
         task.processed = datetime.utcnow()
         task.status = Status.PROCESSED
         session.commit()
+        message.ack()
+
