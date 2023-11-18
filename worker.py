@@ -8,16 +8,25 @@ from models import Status, Task, session
 
 upload_folder = os.environ.get("UPLOAD_FOLDER", "videos")
 
+
 def subscriber_gcp():
     with pubsub_v1.SubscriberClient() as subscriber:
-        subscription_path = 'projects/cloud-uniandes-403120/subscriptions/testSuscription'
-        streaming_pull_future  = subscriber.subscribe(subscription_path, callback = process_video)
-        streaming_pull_future.result()  
+        subscription_path = (
+            "projects/cloud-uniandes-403120/subscriptions/testSuscription"
+        )
+        flow_control = pubsub_v1.types.FlowControl(max_messages=1)
+
+        streaming_pull_future = subscriber.subscribe(
+            subscription_path, callback=process_video, flow_control=flow_control
+        )
+        streaming_pull_future.result()
+
 
 def process_video(message: pubsub_v1.subscriber.message.Message):
     try:
         print("Procesando el archivo {}".format(message.data))
-        task_id = int(message.data) 
+        task_id = int(message.data)
+
         task = session.query(Task).filter_by(id=task_id, status=Status.UPLOADED).first()
         if task is not None:
             task.inprocess = datetime.utcnow()
@@ -34,7 +43,11 @@ def process_video(message: pubsub_v1.subscriber.message.Message):
             )
 
             input_blob_name = BLOB_FORMAT.format(
-                upload_folder, str(task.user_id), "input", task.id, task.input_format.value
+                upload_folder,
+                str(task.user_id),
+                "input",
+                task.id,
+                task.input_format.value,
             )
             output_blob_name = BLOB_FORMAT.format(
                 upload_folder,
@@ -49,7 +62,9 @@ def process_video(message: pubsub_v1.subscriber.message.Message):
 
             convert_video(input_file_name, output_file_name)
 
-            os.makedirs(os.path.join("temp", str(task.user_id), "output"), exist_ok=True)
+            os.makedirs(
+                os.path.join("temp", str(task.user_id), "output"), exist_ok=True
+            )
             upload_to_bucket(output_blob_name, output_file_name)
 
             if os.path.exists(input_file_name):
@@ -63,7 +78,6 @@ def process_video(message: pubsub_v1.subscriber.message.Message):
     except:
         print("Error procesando el archivo {}".format(message.data))
         message.nack()
-    
-    
+
 
 subscriber_gcp()
