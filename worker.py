@@ -10,14 +10,13 @@ from models import Status, Task, session
 upload_folder = os.environ.get("UPLOAD_FOLDER", "videos")
 
 def subscriber_gcp():
-    timeout = 30
     subscriber = pubsub_v1.SubscriberClient()
     subscription_path = 'projects/cloud-uniandes-403120/subscriptions/testSuscription'
-    streaming_pull_future  = subscriber.subscriber(subscription_path, calback = process_video )
+    streaming_pull_future  = subscriber.subscribe(subscription_path, callback = process_video )
 
     with subscriber:
         try:
-            streaming_pull_future.result(timeout=timeout)
+            streaming_pull_future.result()
         except TimeoutError:
             streaming_pull_future.cancel() 
             streaming_pull_future.result()  
@@ -67,3 +66,4 @@ def process_video(message: pubsub_v1.subscriber.message.Message):
         session.commit()
         message.ack()
 
+subscriber_gcp()
