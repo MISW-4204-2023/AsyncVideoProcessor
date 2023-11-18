@@ -1,6 +1,5 @@
 from datetime import datetime
 import os
-from celery import Celery
 from convert_video import convert_video
 from gcp.cloud_storage import BLOB_FORMAT, download_file_from_bucket, upload_to_bucket
 from concurrent.futures import TimeoutError
