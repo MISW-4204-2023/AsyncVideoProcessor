@@ -24,11 +24,11 @@ def subscriber_gcp():
 
 
 def process_video(message: pubsub_v1.subscriber.message.Message):
+    Session = sessionmaker(bind=engine)
+    session = Session()
     try:
         print("Procesando el archivo {}".format(message.data))
         task_id = int(message.data)
-        Session = sessionmaker(bind=engine)
-        session = Session()
         task = session.query(Task).filter_by(id=task_id, status=Status.UPLOADED).first()
         if task is not None:
             task.inprocess = datetime.utcnow()
@@ -81,6 +81,7 @@ def process_video(message: pubsub_v1.subscriber.message.Message):
         print(ex.message)
         print("Error procesando el archivo {}".format(message.data))
         message.nack()
+    session.close()
 
 
 subscriber_gcp()
