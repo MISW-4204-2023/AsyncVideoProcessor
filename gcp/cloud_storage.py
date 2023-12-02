@@ -4,7 +4,7 @@ import os
 from google.cloud import storage
 
 
-bucket_name = os.environ.get("BUCKET_NAME", "proyecto-conversion")
+bucket_name = os.environ.get("BUCKET_NAME", "oct-bucket-team6")
 ## os.environ['GOOGLE_APPLICATION_CREDENTIALS'] ='credentials.json'
 storage_client =storage.Client()
 

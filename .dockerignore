@@ -1,0 +1,11 @@
+
+# Exclude locally installed dependencies
+venv/
+.venv/
+
+# Exclude "build-time" ignore files.
+.dockerignore
+.gcloudignore
+
+# Exclude git history and configuration.
+.gitignore

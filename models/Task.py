@@ -4,10 +4,10 @@ from sqlalchemy import Column, DateTime, Enum, Integer, String
 
 from .Formats import Formats
 from .Status import Status
-from .Base import Base
+from .Base import db
 
 
-class Task(Base):
+class Task(db.Model):
     __tablename__ = 'task'
     id = Column(Integer, primary_key=True)
     created = Column(DateTime, nullable=False, default=datetime.utcnow)
